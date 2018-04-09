@@ -1,14 +1,14 @@
 package com.suikajy.debugtool
 
 import android.annotation.SuppressLint
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.*
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -23,13 +23,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         lv_log.adapter = mAdapter
         val lvParent = lv_log.parent as ViewGroup
-        val emptyView = layoutInflater.inflate(R.layout.layout_no_log, lvParent,false)
+        val emptyView = layoutInflater.inflate(R.layout.layout_no_log, lvParent, false)
         lvParent.addView(emptyView)
         lv_log.emptyView = emptyView
         btn_clear.setOnClickListener({
             App.clearLog()
             updateLogList()
         })
+        lv_log.onItemLongClickListener = AdapterView.OnItemLongClickListener { _, view, _, _ ->
+            val cmb = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val tvContent = view!!.findViewById<TextView>(R.id.tv_log_content)
+            val logContent = tvContent.text.toString().trim()
+            cmb.text = logContent
+            Toast.makeText(this@MainActivity, "已复制到剪切板", Toast.LENGTH_SHORT).show()
+            return@OnItemLongClickListener true
+        }
         bindTheService()
     }
 
